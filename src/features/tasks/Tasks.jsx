@@ -1,29 +1,38 @@
 import { useDispatch, useSelector } from "react-redux"
-import { toggleTaskStatus } from "./taskSlice"
+import { toggleTaskStatus, fetchTasks } from "./taskSlice"
+import { useEffect } from "react"
 
 const Tasks = () => {
     const dispatch = useDispatch()
-    const tasks = useSelector(state => state.tasks).tasks
+    const {tasks, status, error} = useSelector(state => state.tasks.tasks)
+
+    useEffect(() => {
+        dispatch(fetchTasks())
+    }, [])
 
     return (
         <div>
             <h1>My Task List</h1>
+            {status === 'loading' && <p>Loading...</p>}
+            {error && <p>{error}</p>}
             {tasks && 
                 (
-                   tasks.map(taskData => (
+                   tasks.map(taskData => 
+                  (
                     <section>
                         <h3>{taskData.date}</h3>
                         <ul>
-                            {taskData.taskList.map(task => (
+                            {taskData.tasks.map(task => (
                                 <li key={task.taskId}>
-                                    <p>{task.title}
-                                        <button onClick={() => dispatch(toggleTaskStatus(task.taskId))}>{task.status}</button>
+                                    <p>{task.task}
+                                        <button onClick={() => dispatch(toggleTaskStatus(task.taskId))}>{task.taskStatus}</button>
                                     </p>
                                 </li>
                             ))}
                         </ul>
                     </section>
-                   ))
+                   )
+                )
                 )
             }
         </div>

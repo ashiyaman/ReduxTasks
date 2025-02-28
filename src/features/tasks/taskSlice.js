@@ -1,46 +1,20 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import axios from 'axios'
+
+export const fetchTasks = createAsyncThunk('tasks/fetchTasks',
+    async() => {
+        const response = await axios.get('https://task-list-hw-server-student-neog-ca.replit.app/tasks')
+        return response.data
+    }
+    )
 
 export const taskSlice = createSlice(
     {
         name: 'tasks',
         initialState: {
-            tasks: [
-                {
-                    date: '15/07/2024',
-                    taskList: [
-                        {
-                            taskId: 'T001',
-                            title: 'Get Groceries from the market.',
-                            status: 'Pending'
-                        },
-                        {
-                            taskId: 'T002',
-                            title: 'Get to gym.',
-                            status: 'Completed'
-                        },
-                        {
-                            taskId: 'T003',
-                            title: 'Water the plants.',
-                            status: 'Completed'
-                        },
-                    ]
-                },
-                {
-                    date: '16/07/2024',
-                    taskList: [
-                        {                            
-                            taskId: 'T004',
-                            title: 'Go to the park.',
-                            status: 'Completed'                            
-                        },
-                        {
-                            taskId: 'T005',
-                            title: 'Get my room cleaned.',
-                            status: 'Pending'
-                        }
-                    ]
-                }
-            ]
+            tasks: [],
+            status: 'idle',
+            error: null
         },
         reducers: {
             toggleTaskStatus: (state, action) => {
@@ -56,6 +30,20 @@ export const taskSlice = createSlice(
                     }
                 }
             }
+        },
+        extraReducers: (builder) => {
+            builder
+                .addCase(fetchTasks.pending, (state) => {
+                    state.status = 'loading'
+                })
+                .addCase(fetchTasks.fulfilled, (state, action) => {
+                    state.status = 'success',
+                    state.tasks = action.payload
+                })
+                .addCase(fetchTasks.rejected, (state, action) => {
+                    state.status = 'error',
+                    state.error = action.error.message
+                })
         }
     }
 )
